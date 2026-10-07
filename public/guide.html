@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Practical guide to 12 API security controls with threats, mitigations, and an interactive Express and NestJS lab.">
+  <title>API Security Guide</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@560;640&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+<!-- pb-shell --><link rel="stylesheet" href="./pb-shell.css"><!-- pb-shell --><!-- pb-back --><link rel="stylesheet" href="./pb-back.css"><!-- pb-back --></head>
+<body>
+  <main>
+    <nav aria-label="Primary"><a href="/">Lab</a><a aria-current="page" href="/guide.html">Guide</a><a href="https://github.com/anhquanbd2021/api-security-12-ideas">Source</a></nav>
+    <header>
+      <p class="eyebrow">Defense in depth</p>
+      <h1>API Security Guide</h1>
+      <p class="lede">Twelve controls for securing an API boundary. Explore what each control protects, how it fails, what to implement, and where this Express and NestJS lab makes the behavior visible.</p>
+      <p class="warning"><strong>Educational simulator.</strong> Public tokens and in-memory services model behavior; they are not production identity, storage, TLS, or payment systems.</p>
+    </header>
+
+    <section class="panel guide-tools" aria-labelledby="explore-title">
+      <h2 id="explore-title">Explore controls</h2>
+      <label for="control-search">Search controls<input id="control-search" type="search" placeholder="Try token, retry, validation…" autocomplete="off"></label>
+      <div class="filters" aria-label="Filter by category">
+        <button type="button" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" data-filter="boundary" aria-pressed="false">Boundary</button>
+        <button type="button" data-filter="identity" aria-pressed="false">Identity</button>
+        <button type="button" data-filter="data" aria-pressed="false">Data</button>
+        <button type="button" data-filter="operations" aria-pressed="false">Operations</button>
+        <button type="button" data-filter="resilience" aria-pressed="false">Resilience</button>
+      </div>
+      <p id="result-count" role="status" aria-live="polite">12 of 12 controls shown</p>
+    </section>
+
+    <section class="control-grid" aria-label="API security controls">
+      <article class="panel control" data-category="identity">
+        <span class="control-number">Control 01 · Identity</span><h3>Authentication</h3>
+        <p>Proves who calls the API before protected work begins.</p>
+        <dl><dt>Threat</dt><dd>Missing, stolen, expired, or revoked credentials let an attacker impersonate a caller.</dd><dt>Mitigation</dt><dd>Validate tokens server-side, enforce expiry and revocation, rotate credentials, and never place tokens in URLs.</dd><dt>In this lab</dt><dd>Bearer tokens resolve through an asynchronous identity provider. Missing and expired tokens return <code>401</code>.</dd></dl>
+        <div class="tags"><span class="tag">401</span><span class="tag">Bearer token</span></div>
+        <a class="try" href="/?framework=express&amp;identity=expired-token&amp;scenario=owned">Try expired authentication</a>
+      </article>
+      <article class="panel control" data-category="identity">
+        <span class="control-number">Control 02 · Identity</span><h3>Authorization</h3>
+        <p>Decides which actions and resources an authenticated caller may access.</p>
+        <dl><dt>Threat</dt><dd>Broken object-level authorization exposes another user's records when IDs are changed.</dd><dt>Mitigation</dt><dd>Check action and resource ownership on every request. Derive authority from trusted server state, not request fields or hidden UI.</dd><dt>In this lab</dt><dd>The repository enforces ownership. Alice requesting Bob's document gets <code>404</code>, limiting resource enumeration.</dd></dl>
+        <div class="tags"><span class="tag">BOLA</span><span class="tag">404</span></div>
+        <a class="try" href="/?framework=express&amp;identity=alice-token&amp;scenario=foreign">Try authorization failure</a>
+      </article>
+      <article class="panel control" data-category="resilience">
+        <span class="control-number">Control 03 · Resilience</span><h3>Rate Limiting</h3>
+        <p>Caps request volume by identity, source, endpoint, or business operation.</p>
+        <dl><dt>Threat</dt><dd>Brute force, scraping, denial of service, and traffic spikes exhaust capacity or abuse sensitive flows.</dd><dt>Mitigation</dt><dd>Use atomic distributed counters, endpoint-aware limits, predictable <code>429</code> responses, and retry guidance.</dd><dt>In this lab</dt><dd>A Redis-like simulator atomically allows three requests per identity and returns <code>Retry-After</code> when exhausted.</dd></dl>
+        <div class="tags"><span class="tag">429</span><span class="tag">Retry-After</span></div>
+        <a class="try" href="/?framework=nest&amp;identity=bob-token&amp;scenario=foreign">Send requests in the lab</a>
+      </article>
+      <article class="panel control" data-category="boundary">
+        <span class="control-number">Control 04 · Boundary</span><h3>Input Validation</h3>
+        <p>Rejects malformed, unexpected, oversized, or out-of-range input early.</p>
+        <dl><dt>Threat</dt><dd>Unchecked values reach SQL, shell commands, templates, file paths, or downstream systems.</dd><dt>Mitigation</dt><dd>Allow known types, lengths, formats, ranges, and values at every trust boundary. Keep parameterization and output encoding too.</dd><dt>In this lab</dt><dd>Document and payment fields are validated; malformed JSON returns <code>400</code> and payloads over 8 KiB return <code>413</code>.</dd></dl>
+        <div class="tags"><span class="tag">400</span><span class="tag">413</span></div>
+        <a class="try" href="/?framework=nest&amp;identity=alice-token&amp;scenario=invalid">Try invalid input</a>
+      </article>
+      <article class="panel control" data-category="data">
+        <span class="control-number">Control 05 · Data</span><h3>Output Encoding</h3>
+        <p>Prevents untrusted data from becoming executable content in its output context.</p>
+        <dl><dt>Threat</dt><dd>A value safe in JSON becomes dangerous in HTML, an attribute, JavaScript, CSS, or a URL.</dd><dt>Mitigation</dt><dd>Use context-aware escaping, avoid markup concatenation, set correct content types, and add CSP as defense in depth.</dd><dt>In this lab</dt><dd>Responses use JSON serialization and explicit content types. Static pages avoid inline scripts and run under a restrictive CSP.</dd></dl>
+        <div class="tags"><span class="tag">CSP</span><span class="tag">JSON</span></div>
+        <a class="try" href="/?framework=express&amp;identity=alice-token&amp;scenario=owned">Inspect encoded output</a>
+      </article>
+      <article class="panel control" data-category="boundary">
+        <span class="control-number">Control 06 · Boundary</span><h3>HTTPS Everywhere</h3>
+        <p>Encrypts traffic and protects requests from network interception and tampering.</p>
+        <dl><dt>Threat</dt><dd>Plain HTTP exposes credentials and sensitive data to hostile networks, proxies, or compromised infrastructure.</dd><dt>Mitigation</dt><dd>Validate certificates, redirect HTTP, use modern TLS, secure cookies, HSTS where appropriate, and prevent mixed content.</dd><dt>In this lab</dt><dd>Render terminates public HTTPS. Localhost intentionally uses HTTP for development; production transport belongs at the deployment edge.</dd></dl>
+        <div class="tags"><span class="tag">TLS</span><span class="tag">HSTS</span></div>
+        <a class="try" href="/">Open secure public lab</a>
+      </article>
+      <article class="panel control" data-category="operations">
+        <span class="control-number">Control 07 · Operations</span><h3>Secret Rotation</h3>
+        <p>Limits damage when credentials or signing material become exposed.</p>
+        <dl><dt>Threat</dt><dd>Long-lived database passwords, API keys, signing keys, or cloud credentials remain useful after leakage.</dd><dt>Mitigation</dt><dd>Use a secret manager, least-privilege access, overlapping rotation windows, and immediate revocation for compromise.</dd><dt>In this lab</dt><dd>Fixed tokens are public test fixtures only. Production systems need managed secrets and real issuer key rotation.</dd></dl>
+        <div class="tags"><span class="tag">Revocation</span><span class="tag">Key lifecycle</span></div>
+        <a class="try" href="/?framework=express&amp;identity=expired-token&amp;scenario=owned">Observe rejected token</a>
+      </article>
+      <article class="panel control" data-category="identity">
+        <span class="control-number">Control 08 · Identity</span><h3>Least Privilege</h3>
+        <p>Gives each user and service only permissions required for its work.</p>
+        <dl><dt>Threat</dt><dd>A stolen account or vulnerable service gains a much larger blast radius than its job requires.</dd><dt>Mitigation</dt><dd>Scope user roles, service accounts, database grants, cloud policies, CI runners, and third-party integrations.</dd><dt>In this lab</dt><dd>Alice and Bob can retrieve only owned records. Admin-only failure simulation demonstrates a separate authority level.</dd></dl>
+        <div class="tags"><span class="tag">RBAC</span><span class="tag">Blast radius</span></div>
+        <a class="try" href="/?framework=nest&amp;identity=bob-token&amp;scenario=foreign">Try scoped access</a>
+      </article>
+      <article class="panel control" data-category="resilience">
+        <span class="control-number">Control 09 · Resilience</span><h3>Idempotency Keys</h3>
+        <p>Stops supported retried operations from producing duplicate side effects.</p>
+        <dl><dt>Threat</dt><dd>A network failure hides a successful payment response, and retrying charges the customer twice.</dd><dt>Mitigation</dt><dd>Bind a unique key to request data, store the result atomically, return it on replay, and reject changed payloads.</dd><dt>In this lab</dt><dd>The same payment key and amount returns the original payment; key reuse with another amount returns <code>409</code>.</dd></dl>
+        <div class="tags"><span class="tag">Replay</span><span class="tag">409</span></div>
+        <a class="try" href="/?framework=express&amp;identity=alice-token&amp;scenario=payment">Try payment replay</a>
+      </article>
+      <article class="panel control" data-category="operations">
+        <span class="control-number">Control 10 · Operations</span><h3>Audit Logging</h3>
+        <p>Records who did what, when, to which resource, and with what result.</p>
+        <dl><dt>Threat</dt><dd>Teams cannot investigate access, permission changes, exports, or administrative actions after an incident.</dd><dt>Mitigation</dt><dd>Capture actor, action, resource, timestamp, request ID, and result in protected append-only storage without secrets.</dd><dt>In this lab</dt><dd>Payment actions append redacted audit events correlated by request ID; simulator tests verify secret removal.</dd></dl>
+        <div class="tags"><span class="tag">Request ID</span><span class="tag">Redaction</span></div>
+        <a class="try" href="/?framework=express&amp;identity=alice-token&amp;scenario=payment">Generate audit event</a>
+      </article>
+      <article class="panel control" data-category="operations">
+        <span class="control-number">Control 11 · Operations</span><h3>Dependency Scans</h3>
+        <p>Finds known vulnerabilities in direct and transitive packages.</p>
+        <dl><dt>Threat</dt><dd>A vulnerable router, serializer, image library, or build tool exposes every service that loads it.</dd><dt>Mitigation</dt><dd>Lock versions, scan dependencies and artifacts, review exploitability, remove unused packages, and deploy updates.</dd><dt>In this lab</dt><dd><code>npm audit --audit-level=high</code> gates high-severity findings while the lockfile makes resolution reproducible.</dd></dl>
+        <div class="tags"><span class="tag">CVE</span><span class="tag">Lockfile</span></div>
+        <a class="try" href="https://github.com/anhquanbd2021/api-security-12-ideas/blob/main/package-lock.json">Inspect locked dependencies</a>
+      </article>
+      <article class="panel control" data-category="boundary">
+        <span class="control-number">Control 12 · Boundary</span><h3>Error Hygiene</h3>
+        <p>Returns useful failures without revealing internals attackers can exploit.</p>
+        <dl><dt>Threat</dt><dd>Stack traces, paths, SQL, credentials, internal hosts, and framework details disclose attack paths.</dd><dt>Mitigation</dt><dd>Return stable status codes and safe messages with request IDs; retain detailed diagnostics only in protected logs.</dd><dt>In this lab</dt><dd>A simulated internal failure contains sensitive text internally but returns only <code>500</code>, a generic message, and request ID.</dd></dl>
+        <div class="tags"><span class="tag">500</span><span class="tag">Safe errors</span></div>
+        <a class="try" href="/?framework=nest&amp;identity=admin-token&amp;scenario=failure">Try safe error</a>
+      </article>
+
+    </section>
+    <section class="guide-section panel" aria-labelledby="catalog-link-title">
+      <p class="eyebrow">35-case catalog</p><h2 id="catalog-link-title">Visualize every test</h2>
+      <p>Inspect unit, contract, browser, and deployment cases through one seven-stage request pipeline. Live requests, deterministic replays, and read-only deployment checks carry explicit labels.</p>
+      <a class="try" href="/#catalog-title">Open complete test catalog</a>
+    </section>
+
+    <section class="guide-section" aria-labelledby="lab-map-title">
+      <p class="eyebrow">Hands-on map</p><h2 id="lab-map-title">Use the lab</h2>
+      <div class="table-wrap panel"><table><thead><tr><th>Scenario</th><th>Expected behavior</th><th>Controls</th></tr></thead><tbody>
+        <tr><td>Read Alice document</td><td>Alice gets <code>200</code>; absent or expired identity gets <code>401</code>.</td><td>Authentication, authorization</td></tr>
+        <tr><td>Read Bob document</td><td>Alice gets <code>404</code>; Bob gets <code>200</code>.</td><td>Authorization, least privilege</td></tr>
+        <tr><td>Create invalid document</td><td>Empty title gets <code>400</code> with a stable JSON error.</td><td>Input validation, error hygiene</td></tr>
+        <tr><td>Replay payment</td><td>First call gets <code>201</code>; replay returns the same payment with <code>200</code>.</td><td>Idempotency, audit logging</td></tr>
+        <tr><td>Trigger safe error</td><td>Caller gets a generic <code>500</code>; internal secret-like text stays hidden.</td><td>Error hygiene</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="guide-section" aria-labelledby="identities-title">
+      <p class="eyebrow">Test fixtures</p><h2 id="identities-title">Demo identities</h2>
+      <div class="table-wrap panel"><table><thead><tr><th>Identity</th><th>Token</th><th>Purpose</th></tr></thead><tbody>
+        <tr><td>Alice</td><td><code>alice-token</code></td><td>Owns document 1 and can create payments.</td></tr>
+        <tr><td>Bob</td><td><code>bob-token</code></td><td>Owns document 2; demonstrates ownership isolation.</td></tr>
+        <tr><td>Admin</td><td><code>admin-token</code></td><td>Can invoke controlled failure simulation.</td></tr>
+        <tr><td>Expired</td><td><code>expired-token</code></td><td>Demonstrates rejected credentials.</td></tr>
+      </tbody></table></div>
+      <p class="warning"><strong>Never reuse these patterns in production.</strong> Tokens are public fixtures. State, payments, rate counters, and logs reset whenever the service restarts.</p>
+    </section>
+
+    <section class="guide-section panel" aria-labelledby="next-title">
+      <p class="eyebrow">Next step</p><h2 id="next-title">Test both adapters</h2>
+      <p>Express and NestJS share one security contract. Switch frameworks in the lab and compare status codes, headers, and response bodies.</p>
+      <p><a class="try" href="/?framework=express&amp;identity=alice-token&amp;scenario=owned">Open Express preset</a> · <a class="try" href="/?framework=nest&amp;identity=alice-token&amp;scenario=owned">Open NestJS preset</a> · <a href="https://github.com/anhquanbd2021/api-security-12-ideas/blob/main/test/contract/http.test.ts">Read contract tests</a></p>
+    </section>
+
+  </main>
+  <script src="/guide.js" defer></script>
+<!-- pb-shell --><a class="pb-shell" href="https://github.com/anhquanbd2021/api-security-12-ideas" title="api-security-12-ideas — an Article Playbook demo (view source)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#2dd4bf"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="13" y="13" width="9" height="9" rx="4.5" fill="#2dd4bf"/></svg><b>api-security-12-ideas</b><i>DEMO</i></a><!-- pb-shell --><!-- pb-back --><a class="pb-back" id="pb-back" href="https://github.com/anhquanbd2021/api-security-12-ideas" title="Back to the article — api-security-12-ideas">← Article <i>PLAYBOOK</i></a><script>(function(){var a=document.getElementById('pb-back');if(!a)return;var h=location.hostname;if(/^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(h)){a.href='//'+h+':'+(/^(localhost|127\.0\.0\.1)$/.test(h)?'1234':'30082')+'/microsites/article.html?slug=api-security-12-ideas';}})();</script><!-- pb-back --></body>
+</html>

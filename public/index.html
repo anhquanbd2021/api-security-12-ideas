@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore every API security test through accessible animated request flows.">
+  <title>API Security Lab</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@560;640&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+<!-- pb-shell --><link rel="stylesheet" href="./pb-shell.css"><!-- pb-shell --><!-- pb-back --><link rel="stylesheet" href="./pb-back.css"><!-- pb-back --></head>
+<body>
+  <main>
+    <nav aria-label="Primary"><a aria-current="page" href="/">Lab</a><a href="/guide.html">Guide</a><a href="https://github.com/anhquanbd2021/api-security-12-ideas">Source</a></nav>
+    <header class="hero"><div><p class="eyebrow">Express + NestJS · 35 test cases</p><h1>See security decisions happen.</h1><p class="lede">Inspect every unit, contract, browser, and deployment test as one request moves through seven security boundaries.</p></div><p class="warning"><strong>Educational simulator.</strong> No real identities, payments, secrets, or persistent data. State resets when service restarts.</p></header>
+
+    <section class="workspace" aria-label="Security test workspace">
+      <div>
+        <section class="panel controls" aria-labelledby="runner-title">
+          <div><p class="eyebrow">Live runner</p><h2 id="runner-title">Run a public scenario</h2></div>
+          <label>Framework <select id="framework"><option value="express">Express</option><option value="nest">NestJS</option></select></label>
+          <label>Identity <select id="identity"><option value="alice-token">Alice</option><option value="bob-token">Bob</option><option value="admin-token">Admin</option><option value="expired-token">Expired token</option><option value="">No token</option></select></label>
+          <label>Scenario <select id="scenario"><option value="owned">Read Alice document</option><option value="foreign">Read Bob document as selected user</option><option value="invalid">Create invalid document</option><option value="payment">Replay payment</option><option value="failure">Trigger safe error</option></select></label>
+          <button id="run">Run scenario</button>
+        </section>
+
+        <section class="panel catalog" aria-labelledby="catalog-title">
+          <div class="section-heading"><div><p class="eyebrow">Complete catalog</p><h2 id="catalog-title">Inspect all test cases</h2></div><span class="case-count">35 cases</span></div>
+          <label>Test case <select id="case-catalog" aria-describedby="case-note"></select></label>
+          <p id="case-note" class="muted">Select any case to preview its deterministic trace.</p>
+          <dl class="case-meta"><div><dt>Layer</dt><dd id="case-layer">Unit</dd></div><div><dt>Mode</dt><dd><span id="case-mode" class="badge">Live</span></dd></div><div><dt>Expected</dt><dd id="case-status">200</dd></div><div><dt>Control</dt><dd id="case-control">Authentication</dd></div></dl>
+        </section>
+      </div>
+
+      <section class="panel visualizer" aria-labelledby="flow-title">
+        <div class="section-heading"><div><p class="eyebrow">Request trace</p><h2 id="flow-title">Security pipeline</h2></div><span id="flow-state" class="badge" role="status" aria-live="polite">Ready</span></div>
+        <ol id="flow" class="flow" aria-label="Request security stages">
+          <li><span>01</span><strong>Client</strong><small>Build request</small></li>
+          <li><span>02</span><strong>Headers</strong><small>Request ID + policy</small></li>
+          <li><span>03</span><strong>Authentication</strong><small>Resolve identity</small></li>
+          <li><span>04</span><strong>Rate limit</strong><small>Consume counter</small></li>
+          <li><span>05</span><strong>Policy</strong><small>Authorize + validate</small></li>
+          <li><span>06</span><strong>Service</strong><small>Store / payment / audit</small></li>
+          <li><span>07</span><strong>Response</strong><small>Return safe result</small></li>
+        </ol>
+        <div class="request-line"><code id="request-summary">GET /documents/document-1</code><strong id="status-pill">Awaiting run</strong></div>
+        <section class="response" aria-labelledby="response-title"><h3 id="response-title">Response</h3><pre id="output" aria-live="polite">Choose scenario, then run.</pre></section>
+      </section>
+    </section>
+    <p><a href="https://github.com/anhquanbd2021/api-security-12-ideas">Source and tests on GitHub</a></p>
+  </main>
+  <script type="module" src="/app.js"></script>
+<!-- pb-shell --><a class="pb-shell" href="https://github.com/anhquanbd2021/api-security-12-ideas" title="api-security-12-ideas — an Article Playbook demo (view source)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#2dd4bf"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="13" y="13" width="9" height="9" rx="4.5" fill="#2dd4bf"/></svg><b>api-security-12-ideas</b><i>DEMO</i></a><!-- pb-shell --><!-- pb-back --><a class="pb-back" id="pb-back" href="https://github.com/anhquanbd2021/api-security-12-ideas" title="Back to the article — api-security-12-ideas">← Article <i>PLAYBOOK</i></a><script>(function(){var a=document.getElementById('pb-back');if(!a)return;var h=location.hostname;if(/^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(h)){a.href='//'+h+':'+(/^(localhost|127\.0\.0\.1)$/.test(h)?'1234':'30082')+'/microsites/article.html?slug=api-security-12-ideas';}})();</script><!-- pb-back --></body>
+</html>
